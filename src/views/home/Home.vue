@@ -1,115 +1,24 @@
 <template>
   <div id="home">
-    <nav-bar class="home-nav"><div slot="center">蘑菇街</div></nav-bar>
-    <swipe :banners="banners"></swipe>
-    <recommend-view :recommends="recommends"></recommend-view>
-    <ranking></ranking>
-    <tab-control
-      :titles="['新款', '流行', '精选']"
-      class="tab-control"
-    ></tab-control>
-    <ul>
-      <li>1</li>
-      <li>2</li>
-      <li>3</li>
-      <li>4</li>
-      <li>5</li>
-      <li>6</li>
-      <li>7</li>
-      <li>8</li>
-      <li>9</li>
-      <li>10</li>
-      <li>11</li>
-      <li>12</li>
-      <li>13</li>
-      <li>14</li>
-      <li>15</li>
-      <li>16</li>
-      <li>17</li>
-      <li>18</li>
-      <li>19</li>
-      <li>20</li>
-      <li>21</li>
-      <li>22</li>
-      <li>23</li>
-      <li>24</li>
-      <li>25</li>
-      <li>26</li>
-      <li>27</li>
-      <li>28</li>
-      <li>29</li>
-      <li>30</li>
-      <li>31</li>
-      <li>32</li>
-      <li>33</li>
-      <li>34</li>
-      <li>35</li>
-      <li>36</li>
-      <li>37</li>
-      <li>38</li>
-      <li>39</li>
-      <li>40</li>
-      <li>41</li>
-      <li>42</li>
-      <li>43</li>
-      <li>44</li>
-      <li>45</li>
-      <li>46</li>
-      <li>47</li>
-      <li>48</li>
-      <li>49</li>
-      <li>50</li>
-      <li>51</li>
-      <li>52</li>
-      <li>53</li>
-      <li>54</li>
-      <li>55</li>
-      <li>56</li>
-      <li>57</li>
-      <li>58</li>
-      <li>59</li>
-      <li>60</li>
-      <li>61</li>
-      <li>62</li>
-      <li>63</li>
-      <li>64</li>
-      <li>65</li>
-      <li>66</li>
-      <li>67</li>
-      <li>68</li>
-      <li>69</li>
-      <li>70</li>
-      <li>71</li>
-      <li>72</li>
-      <li>73</li>
-      <li>74</li>
-      <li>75</li>
-      <li>76</li>
-      <li>77</li>
-      <li>78</li>
-      <li>79</li>
-      <li>80</li>
-      <li>81</li>
-      <li>82</li>
-      <li>83</li>
-      <li>84</li>
-      <li>85</li>
-      <li>86</li>
-      <li>87</li>
-      <li>88</li>
-      <li>89</li>
-      <li>90</li>
-      <li>91</li>
-      <li>92</li>
-      <li>93</li>
-      <li>94</li>
-      <li>95</li>
-      <li>96</li>
-      <li>97</li>
-      <li>98</li>
-      <li>99</li>
-      <li>100</li>
-    </ul>
+    <nav-bar class="home-nav">
+      <div slot="center">蘑菇街</div>
+    </nav-bar>
+    <!-- 使用BScroll滚动需要设置高度（样式content） -->
+    <b-scroll
+      class="content"
+      ref="scroll"
+      :probe-type="3"
+      @scroll="contentScroll"
+      :pull-up-load="true"
+      @pullingUp="loadMore"
+    >
+      <swipe :banners="banners" @imgSwipeLoad="imgSwipeLoad"></swipe>
+      <recommend-view :recommends="recommends"></recommend-view>
+      <ranking></ranking>
+      <tab-control :titles="['新款', '流行', '精选']" @tabClick="tabClick" ref="tabControl"></tab-control>
+      <goods-list :goods="goods[currentType].list"></goods-list>
+    </b-scroll>
+    <back-top @click.native="backTopClick" v-show="isShowBackTop"></back-top>
   </div>
 </template>
 
@@ -118,52 +27,138 @@
 import NavBar from "components/common/navbar/Navbar";
 // Swipe轮播图
 import Swipe from "components/vant/Swipe";
-// recommend组件
+// RecommendView组件（轮播图下方的组件）
 import RecommendView from "./childComps/RecommendView";
-// 本周排行Ranking组件
+// 本周流行Ranking组件
 import Ranking from "./childComps/Ranking";
-// TabControl组件
+// TabControl组件（新款、流行、精选组件）
 import TabControl from "components/content/tabControl/TabControl";
+// 回到顶部组件
+import BackTop from "components/content/backTop/BackTop";
+// 商品列表数据
+import GoodsList from "components/content/goods/GoodsList";
 
+// BScroll封装
+import BScroll from "components/common/scroll/Scroll";
 // 引入封装的网络模块（home）
-import { getHomeMultidata } from "network/home";
+import { getHomeMultidata, getHomeGoods } from "network/home";
+
+// utils.js工具类封装的方法
 
 export default {
   name: "Profile",
   data() {
     return {
       banners: [],
-      recommends: []
+      recommends: [],
+      goods: {
+        pop: { page: 0, list: [] },
+        new: { page: 0, list: [] },
+        sell: { page: 0, list: [] },
+      },
+      currentType: "pop",
+      isShowBackTop: false,
+      tabOffsetTop: 0,
     };
   },
   // 获取首页多个数据
   created() {
-    getHomeMultidata().then(data => {
-      // 把数据保存到data变量中否则会被销毁
-      this.banners = data.data.banner.list;
-      this.recommends = data.data.recommend.list;
+    // 1、请求多个数据
+    this.getHomeMultidata();
+
+    // 2、请求商品数据
+    this.getHomeGoods("pop");
+    this.getHomeGoods("new");
+    this.getHomeGoods("sell");
+  },
+  mounted() {
+    // 监听item中图片加载完成
+    this.$bus.$on("itemImageLoad", () => {
+      this.$refs.scroll.scroll.refresh();
     });
+  },
+  methods: {
+    // 事件监听相关的方法
+    tabClick(index) {
+      switch (index) {
+        case 0:
+          this.currentType = "pop";
+          break;
+        case 1:
+          this.currentType = "new";
+          break;
+        case 2:
+          this.currentType = "sell";
+          break;
+      }
+    },
+
+    // 监听显示回到顶部按钮和回到顶部
+    backTopClick() {
+      this.$refs.scroll.scrollTo(0, 0, 500);
+    },
+    contentScroll(position) {
+      this.isShowBackTop = -position.y > 2000;
+    },
+
+    // 上拉加载更多
+    loadMore() {
+      console.log("上拉加载更多");
+      this.getHomeGoods(this.currentType);
+      this.$refs.scroll.scroll.finishPullUp();
+    },
+    imgSwipeLoad() {
+      // 获取tabControl的位置
+      // 所有的组件都有一个属性叫$el，用于获取组件中元素的
+      this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop;
+      console.log(this.tabOffsetTop);
+    },
+
+    // 网络请求相关方法
+    getHomeMultidata() {
+      getHomeMultidata().then((res) => {
+        // 把数据保存到res变量中否则会被销毁
+        this.banners = res.data.banner.list;
+        this.recommends = res.data.recommend.list;
+      });
+    },
+    getHomeGoods(type) {
+      const page = this.goods[type].page + 1;
+      getHomeGoods(type, page).then((res) => {
+        this.goods[type].list.push(...res.data.list);
+        this.goods[type].page += 1;
+      });
+    },
   },
   components: {
     NavBar,
     Swipe,
     RecommendView,
     Ranking,
-    TabControl
-  }
+    TabControl,
+    GoodsList,
+    BackTop,
+    BScroll,
+  },
 };
 </script>
 
 <style scoped>
 #home {
   padding-top: 44px;
+  height: 100vh;
+  position: relative;
 }
 .home-nav {
   background: var(--color-tint);
   color: white;
 }
-.tab-control {
-  position: sticky;
-  top: 40px;
+.content {
+  position: absolute;
+  overflow: hidden;
+  left: 0;
+  right: 0;
+  top: 44px;
+  bottom: 49px;
 }
 </style>

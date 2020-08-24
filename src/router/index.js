@@ -11,7 +11,7 @@ Router.prototype.push = function push(location) {
 
 // 导入大的视图组件
 const Home = () => import("views/home/Home.vue");
-const Categary = () => import("views/categary/Categary.vue");
+const Category = () => import("views/category/Category.vue");
 const Cart = () => import("views/cart/Cart.vue");
 const Profile = () => import("views/profile/Profile.vue");
 
@@ -27,8 +27,8 @@ export default new Router({
       component: Home
     },
     {
-      path: "/categary",
-      component: Categary
+      path: "/category",
+      component: Category
     },
     {
       path: "/cart",
