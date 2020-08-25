@@ -3,6 +3,13 @@
     <nav-bar class="home-nav">
       <div slot="center">蘑菇街</div>
     </nav-bar>
+    <tab-control
+      :titles="['新款', '流行', '精选']"
+      @tabClick="tabClick"
+      ref="tabControl1"
+      class="tabControl"
+      v-show="isTabFixed"
+    ></tab-control>
     <!-- 使用BScroll滚动需要设置高度（样式content） -->
     <b-scroll
       class="content"
@@ -15,7 +22,11 @@
       <swipe :banners="banners" @imgSwipeLoad="imgSwipeLoad"></swipe>
       <recommend-view :recommends="recommends"></recommend-view>
       <ranking></ranking>
-      <tab-control :titles="['新款', '流行', '精选']" @tabClick="tabClick" ref="tabControl"></tab-control>
+      <tab-control
+        :titles="['新款', '流行', '精选']"
+        @tabClick="tabClick"
+        ref="tabControl2"
+      ></tab-control>
       <goods-list :goods="goods[currentType].list"></goods-list>
     </b-scroll>
     <back-top @click.native="backTopClick" v-show="isShowBackTop"></back-top>
@@ -54,11 +65,13 @@ export default {
       goods: {
         pop: { page: 0, list: [] },
         new: { page: 0, list: [] },
-        sell: { page: 0, list: [] },
+        sell: { page: 0, list: [] }
       },
       currentType: "pop",
       isShowBackTop: false,
       tabOffsetTop: 0,
+      isTabFixed: false,
+      savey: 0
     };
   },
   // 获取首页多个数据
@@ -91,6 +104,8 @@ export default {
           this.currentType = "sell";
           break;
       }
+      this.$refs.tabControl1.currentIndex = index;
+      this.$refs.tabControl2.currentIndex = index;
     },
 
     // 监听显示回到顶部按钮和回到顶部
@@ -98,7 +113,10 @@ export default {
       this.$refs.scroll.scrollTo(0, 0, 500);
     },
     contentScroll(position) {
-      this.isShowBackTop = -position.y > 2000;
+      // 1、判断backTop是否显示
+      this.isShowBackTop = -position.y > 1500;
+      // 2、决定TabControl是否吸顶（position: fixed）
+      this.isTabFixed = -position.y > this.tabOffsetTop;
     },
 
     // 上拉加载更多
@@ -110,13 +128,13 @@ export default {
     imgSwipeLoad() {
       // 获取tabControl的位置
       // 所有的组件都有一个属性叫$el，用于获取组件中元素的
-      this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop;
+      this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
       console.log(this.tabOffsetTop);
     },
 
     // 网络请求相关方法
     getHomeMultidata() {
-      getHomeMultidata().then((res) => {
+      getHomeMultidata().then(res => {
         // 把数据保存到res变量中否则会被销毁
         this.banners = res.data.banner.list;
         this.recommends = res.data.recommend.list;
@@ -124,11 +142,11 @@ export default {
     },
     getHomeGoods(type) {
       const page = this.goods[type].page + 1;
-      getHomeGoods(type, page).then((res) => {
+      getHomeGoods(type, page).then(res => {
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
       });
-    },
+    }
   },
   components: {
     NavBar,
@@ -138,8 +156,15 @@ export default {
     TabControl,
     GoodsList,
     BackTop,
-    BScroll,
+    BScroll
   },
+  activated() {
+    this.$refs.scroll.scrollTo(0, this.savey, 0);
+    this.$refs.scroll.scroll.refresh();
+  },
+  deactivated() {
+    this.savey = this.$refs.scroll.scroll.y;
+  }
 };
 </script>
 
@@ -160,5 +185,10 @@ export default {
   right: 0;
   top: 44px;
   bottom: 49px;
+}
+.tabControl {
+  position: relative;
+  /* z-index只对定位元素有效果 */
+  z-index: 999;
 }
 </style>
