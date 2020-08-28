@@ -57,7 +57,7 @@ import { getHomeMultidata, getHomeGoods } from "network/home";
 // utils.js工具类封装的方法
 
 export default {
-  name: "Profile",
+  name: "Home",
   data() {
     return {
       banners: [],

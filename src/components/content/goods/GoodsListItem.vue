@@ -1,5 +1,5 @@
 <template>
-  <div class="goods-item">
+  <div class="goods-item" @click="itemClick">
     <!-- 小商品列表的图片 -->
     <img :src="goodsItem.show.img" @load="imgload" />
     <div class="goods-info">
@@ -13,12 +13,14 @@
 </template>
 
 <script>
-import GoodsListItem from "./GoodsListItem";
 export default {
   name: "GoodsListItem",
   methods: {
     imgload() {
       this.$bus.$emit("itemImageLoad");
+    },
+    itemClick() {
+      this.$router.push("/detail/" + this.goodsItem.iid);
     }
   },
   props: {
@@ -37,7 +39,6 @@ export default {
   padding-bottom: 40px;
   position: relative;
   width: 48%;
-  z-index: -999;
 }
 .goods-item img {
   width: 100%;

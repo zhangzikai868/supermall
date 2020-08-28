@@ -5,10 +5,12 @@
     indicator-color="white"
     :stop-propagation="false"
   >
-    <van-swipe-item v-for="(item, index) in banners" :key="index">
-      <a :href="item.link">
-        <img :src="item.image" @load="imgLoad" />
-      </a>
+    <van-swipe-item
+      v-for="(item, index) in topImages"
+      :key="index"
+      class="detailswipe"
+    >
+      <img :src="item" />
     </van-swipe-item>
   </van-swipe>
 </template>
@@ -21,22 +23,14 @@ Vue.use(Swipe);
 Vue.use(SwipeItem);
 
 export default {
-  name: "Swipe",
+  name: "DetailSwipe",
   data() {
     return {
       isLoad: false
     };
   },
   props: {
-    banners: Array
-  },
-  methods: {
-    imgLoad() {
-      if (!this.isLoad) {
-        this.$emit("imgSwipeLoad");
-        this.isLoad = true;
-      }
-    }
+    topImages: Array
   }
 };
 </script>
@@ -44,5 +38,9 @@ export default {
 <style scoped>
 img {
   width: 100%;
+}
+.detailswipe {
+  height: 300px;
+  overflow: hidden;
 }
 </style>
