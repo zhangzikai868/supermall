@@ -1,22 +1,20 @@
 <template>
-  <div class="detailnavbar">
-    <nav-bar>
-      <div slot="left" class="back" @click="backClick">
-        <img src="~assets/img/common/back.svg" alt="" />
+  <nav-bar class="nav-bar">
+    <div slot="left" class="back" @click="backClick">
+      <img src="~assets/img/common/back.svg" alt="" />
+    </div>
+    <div slot="center" class="title">
+      <div
+        v-for="(item, index) in titles"
+        :key="index"
+        class="title-item"
+        :class="{ active: index === currentIndex }"
+        @click="titleItemClick(index)"
+      >
+        {{ item }}
       </div>
-      <div slot="center" class="title">
-        <div
-          v-for="(item, index) in titles"
-          :key="index"
-          class="title-item"
-          :class="{ active: index === currentIndex }"
-          @click="titleItemClick(index)"
-        >
-          {{ item }}
-        </div>
-      </div>
-    </nav-bar>
-  </div>
+    </div>
+  </nav-bar>
 </template>
 
 <script>
@@ -45,10 +43,6 @@ export default {
 </script>
 
 <style scoped>
-.detailnavbar {
-  background-color: #fff;
-  padding-bottom: 44px;
-}
 .title {
   display: flex;
 }
