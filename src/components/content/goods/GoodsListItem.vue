@@ -1,7 +1,7 @@
 <template>
   <div class="goods-item" @click="itemClick">
     <!-- 小商品列表的图片 -->
-    <img :src="goodsItem.show.img" @load="imgload" />
+    <img :src="showImage" @load="imgload" />
     <div class="goods-info">
       <!-- 商品列表的标题 -->
       <p>{{ goodsItem.title }}</p>
@@ -15,12 +15,26 @@
 <script>
 export default {
   name: "GoodsListItem",
+  computed: {
+    showImage() {
+      return this.goodsItem.image || this.goodsItem.show.img;
+    }
+  },
   methods: {
     imgload() {
-      this.$bus.$emit("itemImageLoad");
+      if (this.$route.path.indexOf("/home")) {
+        this.$bus.$emit("homeItemImageLoad");
+      } else if (this.$route.path.indexOf("/detail")) {
+        this.$bus.$emit("detailItemImageLoad");
+      }
     },
     itemClick() {
-      this.$router.push("/detail/" + this.goodsItem.iid);
+      this.$router.push({
+        path: "/detail",
+        query: {
+          iid: this.goodsItem.iid
+        }
+      });
     }
   },
   props: {

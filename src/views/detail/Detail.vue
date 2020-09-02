@@ -1,16 +1,39 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="nav-bar"></detail-nav-bar>
-    <b-scroll class="content" ref="scroll">
-      <detail-swipe :topImages="topImages"></detail-swipe>
+    <detail-nav-bar
+      class="nav-bar"
+      @titleItemClick="titleItemClick"
+      ref="nav"
+    ></detail-nav-bar>
+    <b-scroll
+      class="content"
+      ref="scroll"
+      @scroll="contentScroll"
+      :probe-type="3"
+    >
+      <detail-swipe :top-images="topImages"></detail-swipe>
       <detail-base-info :goods="goods"></detail-base-info>
       <detail-shop-info :shop="shop"></detail-shop-info>
       <detail-goods-info
         :detail-info="detailInfo"
         @imageLoad="imageLoad"
       ></detail-goods-info>
-      <detail-param-info :paramInfo="paramInfo"></detail-param-info>
+      <detail-param-info
+        :param-info="paramInfo"
+        ref="param"
+      ></detail-param-info>
+      <detail-comment-info
+        :comment-info="commentInfo"
+        ref="comment"
+      ></detail-comment-info>
+      <goods-list :goods="recommends" ref="recommend"></goods-list>
     </b-scroll>
+    <detail-bottom-bar></detail-bottom-bar>
+    <back-top
+      @click.native="backTopClick"
+      v-show="isShowBackTop"
+      class="backTop"
+    ></back-top>
   </div>
 </template>
 
@@ -28,16 +51,30 @@ import DetailGoodsInfo from "./childComps/DetailGoodsInfo";
 // 参数组件
 import DetailParamInfo from "./childComps/DetailParamInfo";
 // 用户评论组件
-
+import DetailCommentInfo from "./childComps/DetailCommentInfo";
 // 推荐组件
+import GoodsList from "components/content/goods/GoodsList";
+// 底部加入购物车组件
+import DetailBottomBar from "./childComps/DetailBottomBar";
 
 // 引入之前封装好的batter-scroll组件
 import BScroll from "components/common/scroll/Scroll";
 
+// 混入
+// 回到顶部
+import { backTopMixin } from "common/mixin";
+
 // 网络请求
-import { getDatail, Goods, Shop, GoodsParam } from "network/detail";
+import {
+  getDatail,
+  Goods,
+  Shop,
+  GoodsParam,
+  getRecommend
+} from "network/detail";
 export default {
   name: "Detail",
+  mixins: [backTopMixin],
   data() {
     return {
       iid: null,
@@ -45,21 +82,53 @@ export default {
       goods: {},
       shop: {},
       detailInfo: {},
-      paramInfo: {}
+      paramInfo: {},
+      commentInfo: {},
+      recommends: [],
+      themeTopYs: [],
+      currentIndex: 0
     };
   },
   methods: {
     imageLoad() {
       this.$refs.scroll.scroll.refresh();
+      this.themeTopYs = [];
+      this.themeTopYs.push(0);
+      this.themeTopYs.push(this.$refs.param.$el.offsetTop - 44);
+      this.themeTopYs.push(this.$refs.comment.$el.offsetTop - 44);
+      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop - 44);
+      this.themeTopYs.push(Number.MAX_VALUE);
+    },
+    titleItemClick(index) {
+      this.$refs.scroll.scroll.scrollTo(0, -this.themeTopYs[index], 200);
+    },
+    contentScroll(position) {
+      // 判断是否显示回到顶部按钮
+      this.isShowBackTop = -position.y > 1500;
+
+      // 1、获取Y值
+      const positionY = -position.y;
+      // console.log(positionY);
+      // 2、positionY和主题的Y值进行对比
+      let length = this.themeTopYs.length;
+      for (let i = 0; i < length - 1; i++) {
+        if (
+          this.currentIndex !== i &&
+          positionY >= this.themeTopYs[i] &&
+          positionY < this.themeTopYs[i + 1]
+        ) {
+          this.currentIndex = i;
+          this.$refs.nav.currentIndex = this.currentIndex;
+        }
+      }
     }
   },
   created() {
     // 1、保存传入的iid
-    this.iid = this.$route.params.iid;
+    this.iid = this.$route.query.iid;
     // 2、根据iid请求对应的数据
     getDatail(this.iid).then(res => {
       // 1、获取顶部轮播数据
-      console.log(res);
       const data = res.result;
       this.topImages = data.itemInfo.topImages;
       // 2、获取商品信息
@@ -77,6 +146,26 @@ export default {
         data.itemParams.info,
         data.itemParams.rule
       );
+      // 6、保存评论信息，有的商品没有评论做一个判断
+      if (!data.rete) {
+        this.commentInfo = data.rate.list[0];
+      }
+      // 7、请求推荐数据
+      getRecommend().then(res => {
+        this.recommends = res.data.list;
+      });
+      /*
+      this.$nextTick(() => {
+        // 根据最新的数据，对应的DOM是已经被渲染出来
+        // 但是图片依然是没有加载完的（目前获取的offsetTop是不包含图片的）
+        // offsetTop值不对一般都是图片的问题
+        this.themeTopYs = [];
+        this.themeTopYs.push(0);
+        this.themeTopYs.push(this.$refs.param.$el.offsetTop - 44);
+        this.themeTopYs.push(this.$refs.comment.$el.offsetTop - 44);
+        this.themeTopYs.push(this.$refs.recommend.$el.offsetTop - 44);
+      });
+      */
     });
   },
   components: {
@@ -86,7 +175,10 @@ export default {
     DetailShopInfo,
     BScroll,
     DetailGoodsInfo,
-    DetailParamInfo
+    DetailParamInfo,
+    DetailCommentInfo,
+    GoodsList,
+    DetailBottomBar
   }
 };
 </script>
@@ -101,8 +193,12 @@ export default {
   position: relative;
   background-color: #fff;
   height: 100vh;
+  overflow: hidden;
 }
 .content {
-  height: calc(100% - 44px);
+  height: calc(100% - 44px - 48px);
+}
+.backTop {
+  z-index: inherit;
 }
 </style>

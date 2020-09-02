@@ -40,7 +40,7 @@ export default new Router({
       component: Profile
     },
     {
-      path: "/detail/:iid",
+      path: "/detail",
       component: Detail
     }
   ]

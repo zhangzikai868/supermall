@@ -31,6 +31,7 @@ export default {
   methods: {
     titleItemClick(index) {
       this.currentIndex = index;
+      this.$emit("titleItemClick", index);
     },
     backClick() {
       this.$router.back();
@@ -49,6 +50,7 @@ export default {
 .title .title-item {
   flex: 1;
   font-size: 14px;
+  text-align: center;
 }
 .active {
   color: var(--color-high-text);

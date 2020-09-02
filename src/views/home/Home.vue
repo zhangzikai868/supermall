@@ -44,20 +44,20 @@ import RecommendView from "./childComps/RecommendView";
 import Ranking from "./childComps/Ranking";
 // TabControl组件（新款、流行、精选组件）
 import TabControl from "components/content/tabControl/TabControl";
-// 回到顶部组件
-import BackTop from "components/content/backTop/BackTop";
 // 商品列表数据
 import GoodsList from "components/content/goods/GoodsList";
-
 // BScroll封装
 import BScroll from "components/common/scroll/Scroll";
 // 引入封装的网络模块（home）
 import { getHomeMultidata, getHomeGoods } from "network/home";
 
-// utils.js工具类封装的方法
+// 混入
+// 回到顶部
+import { backTopMixin } from "common/mixin";
 
 export default {
   name: "Home",
+  mixins: [backTopMixin],
   data() {
     return {
       banners: [],
@@ -68,7 +68,6 @@ export default {
         sell: { page: 0, list: [] }
       },
       currentType: "pop",
-      isShowBackTop: false,
       tabOffsetTop: 0,
       isTabFixed: false,
       savey: 0
@@ -108,10 +107,6 @@ export default {
       this.$refs.tabControl2.currentIndex = index;
     },
 
-    // 监听显示回到顶部按钮和回到顶部
-    backTopClick() {
-      this.$refs.scroll.scrollTo(0, 0, 500);
-    },
     contentScroll(position) {
       // 1、判断backTop是否显示
       this.isShowBackTop = -position.y > 1500;
@@ -121,7 +116,6 @@ export default {
 
     // 上拉加载更多
     loadMore() {
-      console.log("上拉加载更多");
       this.getHomeGoods(this.currentType);
       this.$refs.scroll.scroll.finishPullUp();
     },
@@ -129,7 +123,6 @@ export default {
       // 获取tabControl的位置
       // 所有的组件都有一个属性叫$el，用于获取组件中元素的
       this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
-      console.log(this.tabOffsetTop);
     },
 
     // 网络请求相关方法
@@ -155,7 +148,6 @@ export default {
     Ranking,
     TabControl,
     GoodsList,
-    BackTop,
     BScroll
   },
   activated() {
