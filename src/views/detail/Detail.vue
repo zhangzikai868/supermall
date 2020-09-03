@@ -12,8 +12,8 @@
       :probe-type="3"
     >
       <detail-swipe :top-images="topImages"></detail-swipe>
-      <detail-base-info :goods="goods"></detail-base-info>
-      <detail-shop-info :shop="shop"></detail-shop-info>
+      <detail-base-info :goods="goodsInfo"></detail-base-info>
+      <detail-shop-info :shop="shopInfo"></detail-shop-info>
       <detail-goods-info
         :detail-info="detailInfo"
         @imageLoad="imageLoad"
@@ -28,7 +28,7 @@
       ></detail-comment-info>
       <goods-list :goods="recommends" ref="recommend"></goods-list>
     </b-scroll>
-    <detail-bottom-bar></detail-bottom-bar>
+    <detail-bottom-bar @addCart="addToCart"></detail-bottom-bar>
     <back-top
       @click.native="backTopClick"
       v-show="isShowBackTop"
@@ -79,8 +79,8 @@ export default {
     return {
       iid: null,
       topImages: [],
-      goods: {},
-      shop: {},
+      goodsInfo: {},
+      shopInfo: {},
       detailInfo: {},
       paramInfo: {},
       commentInfo: {},
@@ -121,6 +121,19 @@ export default {
           this.$refs.nav.currentIndex = this.currentIndex;
         }
       }
+    },
+    addToCart() {
+      // 1、获取购物车需要展示的商品信息
+      const product = {};
+      product.image = this.topImages[0];
+      product.title = this.goodsInfo.title;
+      product.desc = this.goodsInfo.desc;
+      product.price = this.goodsInfo.realPrice;
+      product.iid = this.iid;
+
+      // 2、将商品添加入购物车
+      this.$store.dispatch("addCart", product);
+      alert("添加购物车成功");
     }
   },
   created() {
@@ -132,13 +145,13 @@ export default {
       const data = res.result;
       this.topImages = data.itemInfo.topImages;
       // 2、获取商品信息
-      this.goods = new Goods(
+      this.goodsInfo = new Goods(
         data.itemInfo,
         data.columns,
         data.shopInfo.services
       );
       // 3、创建店铺信息的对象
-      this.shop = new Shop(data.shopInfo);
+      this.shopInfo = new Shop(data.shopInfo);
       // 4、保存商品的详情数据
       this.detailInfo = data.detailInfo;
       // 5、获取参数信息

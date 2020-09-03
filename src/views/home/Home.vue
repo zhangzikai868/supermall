@@ -85,7 +85,7 @@ export default {
   },
   mounted() {
     // 监听item中图片加载完成
-    this.$bus.$on("itemImageLoad", () => {
+    this.$bus.$on("temImageLoad", () => {
       this.$refs.scroll.scroll.refresh();
     });
   },
@@ -162,9 +162,7 @@ export default {
 
 <style scoped>
 #home {
-  padding-top: 44px;
   height: 100vh;
-  position: relative;
 }
 .home-nav {
   background: var(--color-tint);

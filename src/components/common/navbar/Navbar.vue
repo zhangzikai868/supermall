@@ -19,11 +19,6 @@ export default {
   text-align: center;
   line-height: 44px;
   box-shadow: 0 1px 1px rgba(000, 000, 000, 0.1);
-  position: fixed;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
   z-index: 100;
 }
 .left,
