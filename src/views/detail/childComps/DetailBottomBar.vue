@@ -22,11 +22,15 @@
 </template>
 
 <script>
+import Vue from "vue";
+import { Toast } from "vant";
+Vue.use(Toast);
 export default {
   name: "DetailBottomBat",
   methods: {
     addToCart() {
       this.$emit("addCart");
+      Toast.success("加入购物车成功");
     }
   }
 };

@@ -43,13 +43,14 @@ export default {
   margin: 0;
   width: 18px;
   height: 18px;
+  line-height: 18px;
   border-radius: 50%;
   border: 2px solid #ccc;
   cursor: pointer;
 }
 
 .selector-active {
-  background-color: #ff8198;
-  border-color: #ff8198;
+  background-color: #f40;
+  border-color: #f40;
 }
 </style>

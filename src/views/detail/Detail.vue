@@ -133,7 +133,6 @@ export default {
 
       // 2、将商品添加入购物车
       this.$store.dispatch("addCart", product);
-      alert("添加购物车成功");
     }
   },
   created() {

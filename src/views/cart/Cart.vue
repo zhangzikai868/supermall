@@ -7,12 +7,14 @@
     <!-- 商品列表 -->
     <cart-list></cart-list>
     <!-- 底部汇总 -->
+    <cart-bottom-bar></cart-bottom-bar>
   </div>
 </template>
 
 <script>
 import NavBar from "components/common/navbar/Navbar";
 import CartList from "./childComps/CartList";
+import cartBottomBar from "./childComps/CartBottomBar";
 
 // 可以将getters里面的方法转换成计算属性
 import { mapGetters } from "vuex";
@@ -25,7 +27,8 @@ export default {
   },
   components: {
     NavBar,
-    CartList
+    CartList,
+    cartBottomBar
   },
   computed: {
     // 辅助函数：两种语法

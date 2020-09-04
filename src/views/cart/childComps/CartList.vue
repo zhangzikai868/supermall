@@ -25,7 +25,11 @@ export default {
 
 <style scoped>
 .cart-list {
-  height: calc(100% - 44px - 49px);
-  overflow: scroll;
+  position: fixed;
+  top: 44px;
+  left: 0;
+  right: 0;
+  bottom: 89px;
+  overflow: auto;
 }
 </style>
