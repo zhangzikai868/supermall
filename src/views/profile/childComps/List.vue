@@ -28,4 +28,7 @@ export default {
   margin-left: 10px;
   padding: 13px;
 }
+.item:last-child {
+  border: none;
+}
 </style>

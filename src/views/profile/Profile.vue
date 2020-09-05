@@ -3,7 +3,7 @@
     <nav-bar class="nav-bar"><div slot="center">个人中心</div></nav-bar>
     <login></login>
     <account class="account"></account>
-    <list :list="message1"></list>
+    <list :list="message1" class="message"></list>
     <list :list="message2"></list>
   </div>
 </template>
@@ -12,7 +12,6 @@
 import NavBar from "components/common/navbar/Navbar";
 import Login from "./childComps/Login";
 import Account from "./childComps/Account";
-import ListView from "./childComps/ListView";
 import List from "./childComps/List";
 
 export default {
@@ -24,7 +23,6 @@ export default {
     };
   },
   components: {
-    ListView,
     NavBar,
     Login,
     Account,
@@ -44,6 +42,9 @@ export default {
   color: #fff;
 }
 .account {
+  border-bottom: 10px solid rgb(241, 241, 241);
+}
+.message {
   border-bottom: 10px solid rgb(241, 241, 241);
 }
 </style>
