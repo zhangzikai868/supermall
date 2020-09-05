@@ -30,7 +30,7 @@ export default {
   methods: {
     addToCart() {
       this.$emit("addCart");
-      Toast.success("加入购物车成功");
+      Toast("加入购物车成功");
     }
   }
 };
