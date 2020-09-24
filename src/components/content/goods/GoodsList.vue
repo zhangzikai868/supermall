@@ -12,6 +12,9 @@
 import GoodsListItem from "./GoodsListItem";
 export default {
   name: "GoodsList",
+  scrollBehavior(to, from, savedPosition) {
+    return savedPosition;
+  },
   props: {
     goods: {
       type: Array,
